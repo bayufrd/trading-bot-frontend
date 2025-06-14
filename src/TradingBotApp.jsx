@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, RefreshCw, TrendingUp, Settings, Activity, Database } from 'lucide-react';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || `https://trading-api.dastrevas.com` || 'http://localhost:3001';
+const API_BASE_URL ='http://localhost:3001';
 
 const TradingBotApp = () => {
   const [config, setConfig] = useState({
@@ -16,6 +16,7 @@ const TradingBotApp = () => {
   });
 
   const [orders, setOrders] = useState([]);
+  const [accountInfo, setAccountInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [activeTab, setActiveTab] = useState('config');
@@ -25,6 +26,7 @@ const TradingBotApp = () => {
     console.log('Loading Config...');
     loadConfig();
     loadOrders();
+    getAccountInfo(); 
   }, []);
 
   // Log when state updates
@@ -44,6 +46,20 @@ const TradingBotApp = () => {
     } catch (error) {
       console.log('Error loading configuration:', error);
       setMessage('Error loading configuration');
+    }
+  };
+
+  const getAccountInfo = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/account`);
+      const data = await response.json();
+      if (data.success) {
+        setAccountInfo(data.accountInfo);
+      } else {
+        setMessage('Error fetching account info');
+      }
+    } catch (error) {
+      setMessage('Error fetching account info');
     }
   };
 
@@ -136,7 +152,7 @@ const TradingBotApp = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/test-binance/${config?.symbol}`);
       const data = await response.json();
-  
+
       if (data.success) {
         setMessage(`Binance API OK! Current ${config?.symbol} price: ${data.price}`);
       } else {
@@ -145,9 +161,9 @@ const TradingBotApp = () => {
     } catch (error) {
       setMessage(`Error testing Binance API connection: ${error.message}`);
     }
-};
+  };
 
-    
+
 
   const testWebhook = async () => {
     const testSignal = {
@@ -222,8 +238,16 @@ const TradingBotApp = () => {
             <Database size={20} />
             <span>Orders ({orders.length})</span>
           </button>
+          <button
+            onClick={() => setActiveTab('account-info')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${activeTab === 'account-info'
+              ? 'bg-blue-600 text-white'
+              : 'text-slate-300 hover:text-white hover:bg-slate-700'
+              }`}
+          >
+            <span>Account Info</span>
+          </button>
         </div>
-
         {/* Configuration Tab */}
         {activeTab === 'config' && (
           <div className="bg-slate-800/50 rounded-lg p-6 backdrop-blur-sm">
@@ -479,6 +503,16 @@ const TradingBotApp = () => {
               </div>
             )}
 
+          </div>
+        )}
+        {activeTab === 'account-info' && (
+          <div className="bg-slate-800/50 rounded-lg p-6">
+            <h3 className="text-xl font-semibold mb-4">Account Information</h3>
+            {accountInfo ? (
+              <pre className="text-sm">{JSON.stringify(accountInfo, null, 2)}</pre>
+            ) : (
+              <div>Loading account info...</div>
+            )}
           </div>
         )}
       </div>
