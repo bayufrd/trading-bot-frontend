@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, RefreshCw, TrendingUp, Settings, Activity, Database } from 'lucide-react';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || `https://trading-bot-backend-ivory.vercel.app/api` || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_URL || `https://trading-api.dastrevas.com` || 'http://localhost:3001';
 
 const TradingBotApp = () => {
   const [config, setConfig] = useState({
